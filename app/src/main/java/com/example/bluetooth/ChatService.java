@@ -338,7 +338,8 @@ public class ChatService {
                     mmSocket.close();
                 } catch (IOException e2) {
 
-                }     connectionFailed();
+                }
+                connectionFailed();
                 return;
             }
 
