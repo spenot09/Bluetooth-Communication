@@ -32,10 +32,10 @@ public class MessengerFragment extends Fragment {
 
     private ListView chatWindow;
     private EditText editMessage;
-    private Button sendButton, start_service;
+    private Button sendButton, start_service, client_button;
 
     private String connectedDeciceName = null;
-    
+
     private ArrayAdapter<String> chatAdapter;
 
     private StringBuffer messageOutBuffer;
@@ -47,7 +47,7 @@ public class MessengerFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-		 
+
         //Get local Bluetooth adapter
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -57,18 +57,7 @@ public class MessengerFragment extends Fragment {
             Toast.makeText(activity, "Bluetooth is not available", Toast.LENGTH_LONG).show();
             activity.finish();
         }
-
-/**
-        start_service.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getContext(), ProviderActivity.class);
-                startActivity(intent);            }
-        });
-
- **/
-
-    }
+}
 
     @Override
     public void onStart() {
@@ -119,6 +108,7 @@ public class MessengerFragment extends Fragment {
         editMessage = (EditText) view.findViewById(R.id.edit_message);
         sendButton = (Button) view.findViewById(R.id.send_btn);
         start_service = (Button) view.findViewById(R.id.service_btn);
+        client_button = (Button) view.findViewById(R.id.client_btn);
     }
 
     private void setupChat() {
@@ -140,6 +130,23 @@ public class MessengerFragment extends Fragment {
                 }
             }
         });
+
+        start_service.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), ProviderActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        client_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), RequesterActivity.class);
+                startActivity(intent);
+            }
+        });
+
 
         // Initialize the ChatService to perform bluetooth connections
         chatService = new ChatService(getActivity(), chatHandler);

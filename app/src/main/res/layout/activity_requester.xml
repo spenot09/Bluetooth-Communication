@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".RequesterActivity">
+
+    <com.github.anastr.speedviewlib.PointerSpeedometer
+        android:id="@+id/accGauge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="67dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="32dp"
+        app:layout_constraintBottom_toTopOf="@+id/light_textView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:sv_maxSpeed="10"
+        app:sv_minSpeed="-10"
+        app:sv_trembleDegree="0.3"
+        app:sv_trembleDuration="1500"
+        app:sv_unit="m/s^2"
+        android:layout_marginRight="8dp"
+        android:layout_marginLeft="67dp" />
+
+    <com.github.anastr.speedviewlib.ImageLinearGauge
+        android:id="@+id/fireGauge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="3dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:sv_image="@drawable/fire_transparent"
+        app:sv_maxSpeed="200"
+        app:sv_speedTextPosition="TOP_LEFT"
+        app:sv_textSize="16pt"
+        app:sv_unit="lux" />
+
+
+    <TextView
+        android:id="@+id/acc_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="13dp"
+        android:text="Waiting for data"
+        app:layout_constraintBottom_toTopOf="@+id/acc_sensor_button"
+        app:layout_constraintEnd_toEndOf="@+id/acc_sensor_button"
+        app:layout_constraintHorizontal_bias="0.51"
+        app:layout_constraintStart_toStartOf="@+id/acc_sensor_button"
+        app:layout_constraintTop_toBottomOf="@+id/unbind_button"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/textStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="54dp"
+        android:layout_marginEnd="42dp"
+        android:layout_marginBottom="8dp"
+        android:text="Status..."
+        app:layout_constraintBottom_toTopOf="@+id/acc_textView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.513"
+        app:layout_constraintStart_toEndOf="@+id/unbind_button"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.403"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="42dp" />
+
+    <Button
+        android:id="@+id/unbind_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="52dp"
+        android:text="Unbind "
+        app:layout_constraintEnd_toEndOf="@+id/acc_textView"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/acc_textView"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/acc_sensor_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="13dp"
+        android:text="RequestAccelerometer"
+        app:layout_constraintBottom_toTopOf="@+id/accGauge"
+        app:layout_constraintEnd_toEndOf="@+id/accGauge"
+        app:layout_constraintStart_toStartOf="@+id/accGauge" />
+
+    <Button
+        android:id="@+id/light_sensor_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="140dp"
+        android:layout_marginBottom="16dp"
+        android:text="Request Light"
+        app:layout_constraintBottom_toTopOf="@+id/fireGauge"
+        app:layout_constraintEnd_toEndOf="@+id/fireGauge"
+        app:layout_constraintHorizontal_bias="0.985"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="140dp" />
+
+    <TextView
+        android:id="@+id/light_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:text="Waiting for data"
+        app:layout_constraintBottom_toTopOf="@+id/light_sensor_button"
+        app:layout_constraintEnd_toEndOf="@+id/light_sensor_button"
+        app:layout_constraintStart_toStartOf="@+id/light_sensor_button" />
+
+    <Button
+        android:id="@+id/bind_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="42dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="Bind"
+        app:layout_constraintBottom_toTopOf="@+id/acc_textView"
+        app:layout_constraintEnd_toStartOf="@+id/unbind_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginLeft="28dp"
+        android:layout_marginRight="8dp" />
+
+</android.support.constraint.ConstraintLayout>
