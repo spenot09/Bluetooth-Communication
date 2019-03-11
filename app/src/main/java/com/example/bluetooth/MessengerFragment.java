@@ -126,7 +126,7 @@ public class MessengerFragment extends Fragment {
                 if (null != view) {
                     TextView textView = (TextView) view.findViewById(R.id.edit_message);
                     String message = textView.getText().toString();
-                    sendMessage(message);
+                    sendMessage("Helloooo");
                 }
             }
         });
@@ -146,7 +146,6 @@ public class MessengerFragment extends Fragment {
                 startActivity(intent);
             }
         });
-
 
         // Initialize the ChatService to perform bluetooth connections
         chatService = new ChatService(getActivity(), chatHandler);
