@@ -24,11 +24,21 @@ import pl.droidsonroids.gif.GifImageView;
 public class ProviderActivity extends AppCompatActivity {
 
     private Button start_service_button, stop_service_button, bind_bluetooth_button;
-    private TextView sensor_txt,provider_instruction_textView;
+    private TextView sensor_txt,provider_instruction_textView,light_textView, acc_textView, textStatus;
     private GifImageView gif;
 
-    private boolean bound = false;
+    private int sensor_type; //sensor_type will need to be set by the incoming request from the client
+    static final int MSG_ACCELEROMETER = 1;
+    static final int MSG_LIGHT = 2;
 
+    private boolean bound;
+
+    Bundle bundle = new Bundle();
+    MessengerFragment fragobj = new MessengerFragment();
+
+
+    Messenger mService = null;
+    final Messenger mMessenger =new Messenger(new IncomingHandler());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +51,10 @@ public class ProviderActivity extends AppCompatActivity {
         start_service_button = findViewById(R.id.start_service_button);
         stop_service_button = findViewById(R.id.stop_service_button);
         bind_bluetooth_button = findViewById(R.id.bind_bluetooth_button);
+
+        acc_textView = findViewById(R.id.acc_textView);
+        light_textView = findViewById(R.id.light_textView);
+        textStatus = findViewById(R.id.textStatus);
 
         sensor_txt = findViewById(R.id.sensing_textView);
         provider_instruction_textView = findViewById(R.id.provider_instruction_textView);
@@ -96,10 +110,16 @@ public class ProviderActivity extends AppCompatActivity {
             }
         });
 
+        //rename bind bluetooth to broadcast bluetooth button
         bind_bluetooth_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 doBindService();
+
+                //this will need to be removed post testing
+                sensor_type = MSG_ACCELEROMETER;
+                sendMessageToService(MSG_ACCELEROMETER);
+
             }
         });
     }
@@ -109,13 +129,13 @@ public class ProviderActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case SensorService.MSG_SENSOR:
-                    if (sensor_tpye==MSG_ACCELEROMETER) {
-                        acc_textView.setText(String.format("Accelerometer value: %.1f", msg.obj));
-                        speedometer.speedTo((float)msg.obj, 500);
+                    if (sensor_type==MSG_ACCELEROMETER) {
+                        bundle.putFloat("sensor_val", (float)msg.obj);
+                        fragobj.setArguments(bundle);
+                        acc_textView.setText(String.format("Accelerometer value: %.1f", msg.obj)); //this will need to be deleted later on
                     }
-                    if (sensor_tpye==MSG_LIGHT) {
-                        light_textView.setText("Light sensor value: " + msg.obj);
-                        fire_gauge.speedTo((float)msg.obj, 500);
+                    if (sensor_type==MSG_LIGHT) {
+                        light_textView.setText("Light sensor value: " + msg.obj); //this will need to be deleted later
                     }
                     break;
                 default:
@@ -174,7 +194,7 @@ public class ProviderActivity extends AppCompatActivity {
             // Detach our existing connection.
             unbindService(connection);
             bound = false;
-            //textStatus.setText("Unbinding.");
+            textStatus.setText("Unbinding.");
         }
     }
 

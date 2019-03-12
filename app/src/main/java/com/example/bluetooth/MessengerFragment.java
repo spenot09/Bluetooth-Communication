@@ -36,6 +36,8 @@ public class MessengerFragment extends Fragment {
 
     private String connectedDeciceName = null;
 
+    private float sensor_val;
+
     private ArrayAdapter<String> chatAdapter;
 
     private StringBuffer messageOutBuffer;
@@ -97,6 +99,7 @@ public class MessengerFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        sensor_val = getArguments().getFloat("sensor_val");
         return inflater.inflate(R.layout.messanger_fragment, container, false);
     }
 
@@ -126,7 +129,7 @@ public class MessengerFragment extends Fragment {
                 if (null != view) {
                     TextView textView = (TextView) view.findViewById(R.id.edit_message);
                     String message = textView.getText().toString();
-                    sendMessage("Helloooo");
+                    sendMessage(Float.toString(sensor_val));
                 }
             }
         });

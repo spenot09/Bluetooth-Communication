@@ -87,4 +87,34 @@
         app:layout_constraintStart_toEndOf="@+id/start_service_button"
         app:layout_constraintTop_toBottomOf="@+id/gifImageView" />
 
+    <TextView
+        android:id="@+id/acc_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="21dp"
+        android:layout_marginLeft="21dp"
+        android:layout_marginTop="4dp"
+        android:text="TextView"
+        app:layout_constraintStart_toStartOf="@+id/start_service_button"
+        app:layout_constraintTop_toBottomOf="@+id/start_service_button" />
+
+    <TextView
+        android:id="@+id/light_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="TextView"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/acc_textView" />
+
+    <TextView
+        android:id="@+id/textStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="13dp"
+        android:layout_marginLeft="13dp"
+        android:text="TextView"
+        app:layout_constraintBaseline_toBaselineOf="@+id/start_service_button"
+        app:layout_constraintStart_toEndOf="@+id/start_service_button" />
+
 </android.support.constraint.ConstraintLayout>

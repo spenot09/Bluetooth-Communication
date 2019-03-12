@@ -27,14 +27,12 @@ public class RequesterActivity extends AppCompatActivity {
     private PointerSpeedometer speedometer;
     private ImageLinearGauge fire_gauge;
 
-
-
     Messenger mService = null;
     final Messenger mMessenger = new Messenger(new IncomingHandler());
 
     private boolean bound = false;
 
-    private int sensor_tpye;
+    private int sensor_type;
     static final int MSG_ACCELEROMETER = 1;
     static final int MSG_LIGHT = 2;
 
@@ -59,12 +57,10 @@ public class RequesterActivity extends AppCompatActivity {
         speedometer = findViewById(R.id.accGauge);
         speedometer.speedTo(0);
 
-
-
         acc_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sensor_tpye = MSG_ACCELEROMETER;
+                sensor_type = MSG_ACCELEROMETER;
                 sendMessageToService(MSG_ACCELEROMETER);
             }
         });
@@ -72,7 +68,7 @@ public class RequesterActivity extends AppCompatActivity {
         light_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sensor_tpye = MSG_LIGHT;
+                sensor_type = MSG_LIGHT;
                 sendMessageToService(MSG_LIGHT);
             }
         });
@@ -97,11 +93,11 @@ public class RequesterActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case SensorService.MSG_SENSOR:
-                    if (sensor_tpye==MSG_ACCELEROMETER) {
+                    if (sensor_type==MSG_ACCELEROMETER) {
                         acc_textView.setText(String.format("Accelerometer value: %.1f", msg.obj));
                         speedometer.speedTo((float)msg.obj, 500);
                     }
-                    if (sensor_tpye==MSG_LIGHT) {
+                    if (sensor_type==MSG_LIGHT) {
                         light_textView.setText("Light sensor value: " + msg.obj);
                         fire_gauge.speedTo((float)msg.obj, 500);
                     }
