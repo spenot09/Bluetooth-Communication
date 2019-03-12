@@ -5,13 +5,21 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,6 +31,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Timer;
+
+import static android.content.ContentValues.TAG;
+
 
 public class MessengerFragment extends Fragment {
 
@@ -30,9 +42,15 @@ public class MessengerFragment extends Fragment {
     private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
     private static final int REQUEST_ENABLE_BT = 3;
 
+    private int sensor_type; //sensor_type will need to be set by the incoming request from the client
+    static final int MSG_ACCELEROMETER = 1;
+    static final int MSG_LIGHT = 2;
+
+
     private ListView chatWindow;
     private EditText editMessage;
     private Button sendButton, start_service, client_button;
+    private TextView sensor_result;
 
     private String connectedDeciceName = null;
 
@@ -44,6 +62,13 @@ public class MessengerFragment extends Fragment {
     private BluetoothAdapter bluetoothAdapter;
 
     private ChatService chatService;
+
+    private boolean bound;
+
+    private Handler timer = new Handler();
+
+    Messenger mService = null;
+    final Messenger mMessenger =new Messenger(new IncomingHandler());
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -99,8 +124,14 @@ public class MessengerFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        sensor_val = getArguments().getFloat("sensor_val");
-        return inflater.inflate(R.layout.messanger_fragment, container, false);
+        try {
+            sensor_val = getArguments().getFloat("sensor_val");
+            Log.e(TAG, Float.toString(sensor_val));
+        }
+        catch (NullPointerException a){};
+
+
+            return inflater.inflate(R.layout.messanger_fragment, container, false);
     }
 
 
@@ -112,6 +143,7 @@ public class MessengerFragment extends Fragment {
         sendButton = (Button) view.findViewById(R.id.send_btn);
         start_service = (Button) view.findViewById(R.id.service_btn);
         client_button = (Button) view.findViewById(R.id.client_btn);
+        sensor_result = view.findViewById(R.id.sensor_result);
     }
 
     private void setupChat() {
@@ -127,8 +159,6 @@ public class MessengerFragment extends Fragment {
                 // Send a message using content of the edit text widget
                 View view = getView();
                 if (null != view) {
-                    TextView textView = (TextView) view.findViewById(R.id.edit_message);
-                    String message = textView.getText().toString();
                     sendMessage(Float.toString(sensor_val));
                 }
             }
@@ -145,8 +175,9 @@ public class MessengerFragment extends Fragment {
         client_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), RequesterActivity.class);
-                startActivity(intent);
+                doBindService();
+                sensor_type = MSG_ACCELEROMETER;
+                sendMessageToService(MSG_ACCELEROMETER);
             }
         });
 
@@ -226,6 +257,97 @@ public class MessengerFragment extends Fragment {
             return;
         }
         actionBar.setSubtitle(subTitle);
+    }
+
+    class IncomingHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case SensorService.MSG_SENSOR:
+
+                    sensor_val = (float)(msg.obj);
+                    runnable_message.run();
+                    Log.e(TAG, "HErer");
+                    sensor_result.setText(String.format("Sensor value: %.1f", msg.obj)); //this will need to be deleted later on
+                    /**
+                    if (sensor_type==MSG_ACCELEROMETER) {
+                        acc_textView.setText(String.format("Accelerometer value: %.1f", msg.obj));
+                        speedometer.speedTo((float)msg.obj, 500);
+                    }
+                    if (sensor_type==MSG_LIGHT) {
+                        light_textView.setText("Light sensor value: " + msg.obj);
+                        fire_gauge.speedTo((float)msg.obj, 500);
+                    }
+                     **/
+                    break;
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    }
+
+
+    // Define the code block to be executed
+    private Runnable runnable_message = new Runnable() {
+        @Override
+        public void run() {
+            // Do something here on the main thread
+            sendMessage(Float.toString(sensor_val));
+
+            Log.d("Handlers", "Called on main thread");
+
+        }
+    };
+
+
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mService = new Messenger(service);
+            try {
+                Message msg = Message.obtain(null, SensorService.MSG_REGISTER_CLIENT);
+                msg.replyTo = mMessenger;
+                mService.send(msg);
+            }
+            catch (RemoteException e) {
+                // In this case the service has crashed before we could even do anything with it
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mService = null;
+        }
+    };
+
+
+    private void sendMessageToService(int intvaluetosend) {
+        if (bound) {
+            if (mService != null) {
+                try {
+                    //need to check this if successful because may need to alter for use
+                    Message msg = Message.obtain(null, SensorService.MSG_SENSOR, intvaluetosend, 0);
+                    msg.replyTo = mMessenger;
+                    mService.send(msg);
+                }
+                catch (RemoteException e) {
+                }
+            }
+        }
+    }
+
+    void doBindService() {
+        getActivity().bindService(new Intent(getActivity(), SensorService.class), connection, Context.BIND_AUTO_CREATE);
+        bound = true;
+    }
+
+    void doUnbindService() {
+        if (bound) {
+
+            // Detach our existing connection.
+            getActivity().unbindService(connection);
+            bound = false;
+        }
     }
 
 
