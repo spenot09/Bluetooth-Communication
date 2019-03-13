@@ -31,7 +31,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Timer;
+import com.github.anastr.speedviewlib.ImageLinearGauge;
+import com.github.anastr.speedviewlib.PointerSpeedometer;
 
 import static android.content.ContentValues.TAG;
 
@@ -46,11 +47,12 @@ public class MessengerFragment extends Fragment {
     static final int MSG_ACCELEROMETER = 1;
     static final int MSG_LIGHT = 2;
 
+    private float sens_val_receiver_end;
 
     private ListView chatWindow;
     private EditText editMessage;
-    private Button sendButton, start_service, client_button;
-    private TextView sensor_result;
+    private Button sendButton, start_service, client_button, receiver_btn;
+    private TextView sensor_result, receiving_txt;
 
     private String connectedDeciceName = null;
 
@@ -65,10 +67,11 @@ public class MessengerFragment extends Fragment {
 
     private boolean bound;
 
-    private Handler timer = new Handler();
+    private PointerSpeedometer speedometer;
+    private ImageLinearGauge fire_gauge;
 
     Messenger mService = null;
-    final Messenger mMessenger =new Messenger(new IncomingHandler());
+    final Messenger mMessenger = new Messenger(new IncomingHandler());
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -84,12 +87,12 @@ public class MessengerFragment extends Fragment {
             Toast.makeText(activity, "Bluetooth is not available", Toast.LENGTH_LONG).show();
             activity.finish();
         }
-}
+    }
 
     @Override
     public void onStart() {
         super.onStart();
-		// enable bt adapter here
+        // enable bt adapter here
         if (!bluetoothAdapter.isEnabled()) {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
@@ -124,17 +127,8 @@ public class MessengerFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        try {
-            sensor_val = getArguments().getFloat("sensor_val");
-            Log.e(TAG, Float.toString(sensor_val));
-        }
-        catch (NullPointerException a){};
-
-
-            return inflater.inflate(R.layout.messanger_fragment, container, false);
+        return inflater.inflate(R.layout.messanger_fragment, container, false);
     }
-
-
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -144,6 +138,14 @@ public class MessengerFragment extends Fragment {
         start_service = (Button) view.findViewById(R.id.service_btn);
         client_button = (Button) view.findViewById(R.id.client_btn);
         sensor_result = view.findViewById(R.id.sensor_result);
+        receiving_txt = view.findViewById(R.id.receiver_textView);
+        receiver_btn = view.findViewById(R.id.receiver_btn);
+
+
+        fire_gauge = view.findViewById(R.id.fireGauge);
+
+        speedometer = view.findViewById(R.id.accGauge);
+        speedometer.speedTo(0);
     }
 
     private void setupChat() {
@@ -152,7 +154,6 @@ public class MessengerFragment extends Fragment {
         chatAdapter = new ArrayAdapter<String>(getActivity(), R.layout.message);
 
         chatWindow.setAdapter(chatAdapter);
-
         // Initialize the send button with a listener that for click events
         sendButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -181,6 +182,15 @@ public class MessengerFragment extends Fragment {
             }
         });
 
+        receiver_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sens_val_receiver_end = (float) chatWindow.getItemAtPosition(chatWindow.getLastVisiblePosition());
+                receiving_txt.setText(Float.toString(sens_val_receiver_end));
+
+                runnable_sensing.run();
+            }
+        });
         // Initialize the ChatService to perform bluetooth connections
         chatService = new ChatService(getActivity(), chatHandler);
 
@@ -189,8 +199,8 @@ public class MessengerFragment extends Fragment {
     }
 
     private void ensureDiscoverable() {
-		//insert discoverable code here
-        if (bluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE){
+        //insert discoverable code here
+        if (bluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
             Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
             discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
             startActivity(discoverableIntent);
@@ -265,19 +275,19 @@ public class MessengerFragment extends Fragment {
             switch (msg.what) {
                 case SensorService.MSG_SENSOR:
 
-                    sensor_val = (float)(msg.obj);
+                    sensor_val = (float) (msg.obj);
                     runnable_message.run();
                     Log.e(TAG, "HErer");
                     sensor_result.setText(String.format("Sensor value: %.1f", msg.obj)); //this will need to be deleted later on
                     /**
-                    if (sensor_type==MSG_ACCELEROMETER) {
-                        acc_textView.setText(String.format("Accelerometer value: %.1f", msg.obj));
-                        speedometer.speedTo((float)msg.obj, 500);
-                    }
-                    if (sensor_type==MSG_LIGHT) {
-                        light_textView.setText("Light sensor value: " + msg.obj);
-                        fire_gauge.speedTo((float)msg.obj, 500);
-                    }
+                     if (sensor_type==MSG_ACCELEROMETER) {
+                     acc_textView.setText(String.format("Accelerometer value: %.1f", msg.obj));
+                     speedometer.speedTo((float)msg.obj, 500);
+                     }
+                     if (sensor_type==MSG_LIGHT) {
+                     light_textView.setText("Light sensor value: " + msg.obj);
+                     fire_gauge.speedTo((float)msg.obj, 500);
+                     }
                      **/
                     break;
                 default:
@@ -286,19 +296,28 @@ public class MessengerFragment extends Fragment {
         }
     }
 
-
     // Define the code block to be executed
     private Runnable runnable_message = new Runnable() {
         @Override
         public void run() {
             // Do something here on the main thread
             sendMessage(Float.toString(sensor_val));
-
             Log.d("Handlers", "Called on main thread");
-
         }
     };
 
+    private Runnable runnable_sensing = new Runnable() {
+        @Override
+        public void run() {
+            // Do something here on the main thread
+
+            chatWindow.getItemAtPosition(chatWindow.getLastVisiblePosition());
+
+            Log.e(TAG, (String)chatWindow.getItemAtPosition(chatWindow.getLastVisiblePosition()));
+            sens_val_receiver_end = Float.parseFloat((String)chatWindow.getItemAtPosition(chatWindow.getLastVisiblePosition()));
+            Log.d("Handlers", "Called on main thread");
+        }
+    };
 
     private ServiceConnection connection = new ServiceConnection() {
         @Override
@@ -308,8 +327,7 @@ public class MessengerFragment extends Fragment {
                 Message msg = Message.obtain(null, SensorService.MSG_REGISTER_CLIENT);
                 msg.replyTo = mMessenger;
                 mService.send(msg);
-            }
-            catch (RemoteException e) {
+            } catch (RemoteException e) {
                 // In this case the service has crashed before we could even do anything with it
             }
         }
@@ -329,8 +347,7 @@ public class MessengerFragment extends Fragment {
                     Message msg = Message.obtain(null, SensorService.MSG_SENSOR, intvaluetosend, 0);
                     msg.replyTo = mMessenger;
                     mService.send(msg);
-                }
-                catch (RemoteException e) {
+                } catch (RemoteException e) {
                 }
             }
         }
