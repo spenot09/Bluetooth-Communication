@@ -3,7 +3,7 @@
 
     <string name="bulleted_list">
         1. Start the service to allow the client to bind to it and access sensor values\n
-        2. You can stop the service to shutdown the background process (this will also kill \n off the binding from the client)
+        2. You can stop the service to shutdown the background process (this will also kill off the binding from the client)
     </string>
     <string name="title">Welcome!</string>
 

@@ -50,11 +50,6 @@ public class ProviderActivity extends AppCompatActivity {
 
         start_service_button = findViewById(R.id.start_service_button);
         stop_service_button = findViewById(R.id.stop_service_button);
-        bind_bluetooth_button = findViewById(R.id.bind_bluetooth_button);
-
-        acc_textView = findViewById(R.id.acc_textView);
-        light_textView = findViewById(R.id.light_textView);
-        textStatus = findViewById(R.id.textStatus);
 
         sensor_txt = findViewById(R.id.sensing_textView);
         provider_instruction_textView = findViewById(R.id.provider_instruction_textView);
@@ -111,17 +106,6 @@ public class ProviderActivity extends AppCompatActivity {
         });
 
         //rename bind bluetooth to broadcast bluetooth button
-        bind_bluetooth_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                doBindService();
-
-                //this will need to be removed post testing
-                sensor_type = MSG_ACCELEROMETER;
-                sendMessageToService(MSG_ACCELEROMETER);
-
-            }
-        });
     }
 
     class IncomingHandler extends Handler {

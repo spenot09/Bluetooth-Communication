@@ -51,7 +51,7 @@ public class MessengerFragment extends Fragment {
 
     private ListView chatWindow;
     private EditText editMessage;
-    private Button sendButton, start_service, client_button, receiver_btn;
+    private Button sendButton, start_service, client_button, receiver_btn, visualise_btn;
     private TextView sensor_result, receiving_txt;
 
     private String connectedDeciceName = null;
@@ -65,7 +65,7 @@ public class MessengerFragment extends Fragment {
 
     private ChatService chatService;
 
-    private boolean bound;
+    private boolean bound, receive, visualise;
 
     private PointerSpeedometer speedometer;
     private ImageLinearGauge fire_gauge;
@@ -140,7 +140,7 @@ public class MessengerFragment extends Fragment {
         sensor_result = view.findViewById(R.id.sensor_result);
         receiving_txt = view.findViewById(R.id.receiver_textView);
         receiver_btn = view.findViewById(R.id.receiver_btn);
-
+        visualise_btn = view.findViewById(R.id.graphs_btn);
 
         fire_gauge = view.findViewById(R.id.fireGauge);
 
@@ -185,12 +185,17 @@ public class MessengerFragment extends Fragment {
         receiver_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sens_val_receiver_end = (float) chatWindow.getItemAtPosition(chatWindow.getLastVisiblePosition());
-                receiving_txt.setText(Float.toString(sens_val_receiver_end));
-
-                runnable_sensing.run();
+                receive = true;
             }
         });
+
+        visualise_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                visualise = true;
+            }
+        });
+
         // Initialize the ChatService to perform bluetooth connections
         chatService = new ChatService(getActivity(), chatHandler);
 
@@ -305,7 +310,7 @@ public class MessengerFragment extends Fragment {
             Log.d("Handlers", "Called on main thread");
         }
     };
-
+/**
     private Runnable runnable_sensing = new Runnable() {
         @Override
         public void run() {
@@ -318,7 +323,7 @@ public class MessengerFragment extends Fragment {
             Log.d("Handlers", "Called on main thread");
         }
     };
-
+**/
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
@@ -399,6 +404,14 @@ public class MessengerFragment extends Fragment {
                     byte[] readBuf = (byte[]) msg.obj;
                     // construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
+                    Log.e(TAG, "THE INCOMING VALUE IS: "+readMessage);
+                    if(receive){
+                        sens_val_receiver_end = Float.parseFloat(readMessage);
+                        if (visualise){
+                            speedometer.speedTo(sens_val_receiver_end, 500);
+                        }
+                        //receiving_txt.setText(Float.toString(sens_val_receiver_end));
+                    }
                     chatAdapter.add(connectedDeciceName + ":  " + readMessage);
                     break;
                 case Constants.MESSAGE_DEVICE_NAME:
