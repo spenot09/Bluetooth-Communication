@@ -34,6 +34,9 @@ import android.widget.Toast;
 import com.github.anastr.speedviewlib.ImageLinearGauge;
 import com.github.anastr.speedviewlib.PointerSpeedometer;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static android.content.ContentValues.TAG;
 
 
@@ -43,7 +46,8 @@ public class MessengerFragment extends Fragment {
     private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
     private static final int REQUEST_ENABLE_BT = 3;
 
-    private String [] acc_terms = {"accelerometer", "speed", "tilt", "TYPE_ACCELEROMETER"};
+    private List<String> acc_terms = Arrays.asList("accelerometer", "speed", "tilt", "TYPE_ACCELEROMETER");
+    private List<String> light_terms = Arrays.asList("light", "Light", "light sensor", "TYPE_LIGHT");
 
     private int sensor_type; //sensor_type will need to be set by the incoming request from the client
     static final int MSG_ACCELEROMETER = 1;
@@ -151,11 +155,11 @@ public class MessengerFragment extends Fragment {
     }
 
     private void setupChat() {
-
         // Initialize the array adapter for the conversation thread
         chatAdapter = new ArrayAdapter<String>(getActivity(), R.layout.message);
 
         chatWindow.setAdapter(chatAdapter);
+
         // Initialize the send button with a listener that for click events
         sendButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -181,8 +185,17 @@ public class MessengerFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 doBindService();
-                sensor_type = MSG_ACCELEROMETER;
-                sendMessageToService(MSG_ACCELEROMETER);
+                /**
+                Log.e(TAG, "VALUE OF SENSOR_TYPE IS: " + Integer.toString(sensor_type));
+                if (sensor_type == MSG_ACCELEROMETER) {
+                    sendMessageToService(MSG_ACCELEROMETER);
+                }
+                if(sensor_type == MSG_LIGHT){
+                    sendMessageToService(MSG_LIGHT);
+                }
+                 **/
+                sensor_type = MSG_LIGHT;
+                sendMessageToService(MSG_LIGHT);
             }
         });
 
@@ -395,15 +408,27 @@ public class MessengerFragment extends Fragment {
                     byte[] readBuf = (byte[]) msg.obj;
                     // construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
-                    Log.e(TAG, "THE INCOMING VALUE IS: "+readMessage);
+                    //Log.e(TAG, "THE INCOMING VALUE IS: "+readMessage);
 
                     if (acc_terms.contains(readMessage)){
-
+                        Log.e(TAG, "ACCELEROMETER SELECTED");
+                        sensor_type = MSG_ACCELEROMETER;
                     }
+
+                    if (light_terms.contains(readMessage)){
+                        Log.e(TAG, "LIGHT SELECTED");
+                        sensor_type = MSG_LIGHT;
+                    }
+
                     if(receive){
                         sens_val_receiver_end = Float.parseFloat(readMessage);
                         if (visualise){
-                            speedometer.speedTo(sens_val_receiver_end, 500);
+                            if (sensor_type == MSG_ACCELEROMETER) {
+                                speedometer.speedTo(sens_val_receiver_end, 500);
+                            }
+                            if(sensor_type == MSG_LIGHT){
+                                fire_gauge.speedTo((float)msg.obj, 500);
+                            }
                         }
                         //receiving_txt.setText(Float.toString(sens_val_receiver_end));
                     }

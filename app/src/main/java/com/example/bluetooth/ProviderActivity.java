@@ -33,10 +33,6 @@ public class ProviderActivity extends AppCompatActivity {
 
     private boolean bound;
 
-    Bundle bundle = new Bundle();
-    MessengerFragment fragobj = new MessengerFragment();
-
-
     Messenger mService = null;
     final Messenger mMessenger =new Messenger(new IncomingHandler());
 
@@ -114,8 +110,6 @@ public class ProviderActivity extends AppCompatActivity {
             switch (msg.what) {
                 case SensorService.MSG_SENSOR:
                     if (sensor_type==MSG_ACCELEROMETER) {
-                        bundle.putFloat("sensor_val", (float)msg.obj);
-                        fragobj.setArguments(bundle);
                         acc_textView.setText(String.format("Accelerometer value: %.1f", msg.obj)); //this will need to be deleted later on
                     }
                     if (sensor_type==MSG_LIGHT) {
