@@ -43,6 +43,8 @@ public class MessengerFragment extends Fragment {
     private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
     private static final int REQUEST_ENABLE_BT = 3;
 
+    private String [] acc_terms = {"accelerometer", "speed", "tilt", "TYPE_ACCELEROMETER"};
+
     private int sensor_type; //sensor_type will need to be set by the incoming request from the client
     static final int MSG_ACCELEROMETER = 1;
     static final int MSG_LIGHT = 2;
@@ -160,7 +162,9 @@ public class MessengerFragment extends Fragment {
                 // Send a message using content of the edit text widget
                 View view = getView();
                 if (null != view) {
-                    sendMessage(Float.toString(sensor_val));
+                    TextView textView = view.findViewById(R.id.edit_message);
+                    String message = textView.getText().toString();
+                    sendMessage(message);
                 }
             }
         });
@@ -282,18 +286,18 @@ public class MessengerFragment extends Fragment {
 
                     sensor_val = (float) (msg.obj);
                     runnable_message.run();
-                    Log.e(TAG, "HErer");
                     sensor_result.setText(String.format("Sensor value: %.1f", msg.obj)); //this will need to be deleted later on
+
                     /**
-                     if (sensor_type==MSG_ACCELEROMETER) {
-                     acc_textView.setText(String.format("Accelerometer value: %.1f", msg.obj));
-                     speedometer.speedTo((float)msg.obj, 500);
-                     }
-                     if (sensor_type==MSG_LIGHT) {
-                     light_textView.setText("Light sensor value: " + msg.obj);
-                     fire_gauge.speedTo((float)msg.obj, 500);
-                     }
-                     **/
+                    if (sensor_type==MSG_ACCELEROMETER) {
+                    acc_textView.setText(String.format("Accelerometer value: %.1f", msg.obj));
+                    speedometer.speedTo((float)msg.obj, 500);
+                    }
+                    if (sensor_type==MSG_LIGHT) {
+                    light_textView.setText("Light sensor value: " + msg.obj);
+                    fire_gauge.speedTo((float)msg.obj, 500);
+                    }
+                    **/
                     break;
                 default:
                     super.handleMessage(msg);
@@ -310,20 +314,7 @@ public class MessengerFragment extends Fragment {
             Log.d("Handlers", "Called on main thread");
         }
     };
-/**
-    private Runnable runnable_sensing = new Runnable() {
-        @Override
-        public void run() {
-            // Do something here on the main thread
 
-            chatWindow.getItemAtPosition(chatWindow.getLastVisiblePosition());
-
-            Log.e(TAG, (String)chatWindow.getItemAtPosition(chatWindow.getLastVisiblePosition()));
-            sens_val_receiver_end = Float.parseFloat((String)chatWindow.getItemAtPosition(chatWindow.getLastVisiblePosition()));
-            Log.d("Handlers", "Called on main thread");
-        }
-    };
-**/
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
@@ -405,6 +396,10 @@ public class MessengerFragment extends Fragment {
                     // construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
                     Log.e(TAG, "THE INCOMING VALUE IS: "+readMessage);
+
+                    if (acc_terms.contains(readMessage)){
+
+                    }
                     if(receive){
                         sens_val_receiver_end = Float.parseFloat(readMessage);
                         if (visualise){
