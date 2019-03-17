@@ -74,7 +74,6 @@ public class SensorService extends Service implements SensorEventListener {
     private void sendMessageToUI(float sensor_val) {
             try {
                 // Send data as an int, this will need to be a float but just testing atm with a static value passed as a parameter
-                Log.e(TAG, "sensor_val is: " + sensor_val);
                 mClient.send(Message.obtain(null, MSG_SENSOR, sensor_val));
             }
             catch (RemoteException e) {

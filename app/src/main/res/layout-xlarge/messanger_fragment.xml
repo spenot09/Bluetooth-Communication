@@ -17,6 +17,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:orientation="horizontal">
 
         <EditText
@@ -32,12 +33,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/send" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
 
         <Button
             android:id="@+id/service_btn"
@@ -51,12 +46,6 @@
             android:layout_height="wrap_content"
             android:text="Send data" />
 
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
 
         <Button
             android:id="@+id/receiver_btn"
@@ -81,8 +70,8 @@
 
         <com.github.anastr.speedviewlib.PointerSpeedometer
             android:id="@+id/accGauge"
-            android:layout_width="130dp"
-            android:layout_height="141dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginStart="67dp"
             android:layout_marginLeft="67dp"
             android:layout_marginEnd="8dp"
@@ -94,12 +83,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:sv_maxSpeed="10"
             app:sv_minSpeed="-10"
-            app:sv_speedTextSize="10dp"
-            app:sv_textSize="7dp"
             app:sv_trembleDegree="0.3"
             app:sv_trembleDuration="1500"
-            app:sv_unit="m/s^2"
-            app:sv_unitTextSize="6dp" />
+            app:sv_unit="m/s^2" />
     </LinearLayout>
 
     <LinearLayout

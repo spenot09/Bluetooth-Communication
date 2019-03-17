@@ -58,7 +58,6 @@ public class MessengerFragment extends Fragment {
     private ListView chatWindow;
     private EditText editMessage;
     private Button sendButton, start_service, client_button, receiver_btn, visualise_btn;
-    private TextView sensor_result, receiving_txt;
 
     private String connectedDeciceName = null;
 
@@ -143,8 +142,6 @@ public class MessengerFragment extends Fragment {
         sendButton = (Button) view.findViewById(R.id.send_btn);
         start_service = (Button) view.findViewById(R.id.service_btn);
         client_button = (Button) view.findViewById(R.id.client_btn);
-        sensor_result = view.findViewById(R.id.sensor_result);
-        receiving_txt = view.findViewById(R.id.receiver_textView);
         receiver_btn = view.findViewById(R.id.receiver_btn);
         visualise_btn = view.findViewById(R.id.graphs_btn);
 
@@ -185,7 +182,7 @@ public class MessengerFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 doBindService();
-                /**
+
                 Log.e(TAG, "VALUE OF SENSOR_TYPE IS: " + Integer.toString(sensor_type));
                 if (sensor_type == MSG_ACCELEROMETER) {
                     sendMessageToService(MSG_ACCELEROMETER);
@@ -193,9 +190,6 @@ public class MessengerFragment extends Fragment {
                 if(sensor_type == MSG_LIGHT){
                     sendMessageToService(MSG_LIGHT);
                 }
-                 **/
-                sensor_type = MSG_LIGHT;
-                sendMessageToService(MSG_LIGHT);
             }
         });
 
@@ -299,18 +293,7 @@ public class MessengerFragment extends Fragment {
 
                     sensor_val = (float) (msg.obj);
                     runnable_message.run();
-                    sensor_result.setText(String.format("Sensor value: %.1f", msg.obj)); //this will need to be deleted later on
 
-                    /**
-                    if (sensor_type==MSG_ACCELEROMETER) {
-                    acc_textView.setText(String.format("Accelerometer value: %.1f", msg.obj));
-                    speedometer.speedTo((float)msg.obj, 500);
-                    }
-                    if (sensor_type==MSG_LIGHT) {
-                    light_textView.setText("Light sensor value: " + msg.obj);
-                    fire_gauge.speedTo((float)msg.obj, 500);
-                    }
-                    **/
                     break;
                 default:
                     super.handleMessage(msg);
@@ -402,6 +385,17 @@ public class MessengerFragment extends Fragment {
                     byte[] writeBuf = (byte[]) msg.obj;
                     // construct a string from the buffer
                     String writeMessage = new String(writeBuf);
+
+                    if (acc_terms.contains(writeMessage)){
+                        Log.e(TAG, "ACCELEROMETER SELECTED");
+                        sensor_type = MSG_ACCELEROMETER;
+                    }
+
+                    if (light_terms.contains(writeMessage)){
+                        Log.e(TAG, "LIGHT SELECTED");
+                        sensor_type = MSG_LIGHT;
+                    }
+
                     chatAdapter.add("Me:  " + writeMessage);
                     break;
                 case Constants.MESSAGE_READ:
@@ -422,15 +416,16 @@ public class MessengerFragment extends Fragment {
 
                     if(receive){
                         sens_val_receiver_end = Float.parseFloat(readMessage);
+                        Log.e(TAG, "Value of sens_val_receiver_end is " + sens_val_receiver_end);
                         if (visualise){
+                            Log.e(TAG, "Value of sensor_type is: " + sensor_type);
                             if (sensor_type == MSG_ACCELEROMETER) {
                                 speedometer.speedTo(sens_val_receiver_end, 500);
                             }
                             if(sensor_type == MSG_LIGHT){
-                                fire_gauge.speedTo((float)msg.obj, 500);
+                                fire_gauge.speedTo(sens_val_receiver_end, 500);
                             }
                         }
-                        //receiving_txt.setText(Float.toString(sens_val_receiver_end));
                     }
                     chatAdapter.add(connectedDeciceName + ":  " + readMessage);
                     break;
