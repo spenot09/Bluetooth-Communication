@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:gravity="center">
 
     <ListView
         android:id="@+id/chat_window"
@@ -80,8 +81,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
+        >
 
         <com.github.anastr.speedviewlib.PointerSpeedometer
             android:id="@+id/accGauge"
@@ -99,17 +101,17 @@
             app:sv_maxSpeed="10"
             app:sv_minSpeed="-10"
             app:sv_speedTextSize="10dp"
-            app:sv_textSize="7dp"
+            app:sv_textSize="9dp"
             app:sv_trembleDegree="0.3"
             app:sv_trembleDuration="1500"
             app:sv_unit="m/s^2"
-            app:sv_unitTextSize="6dp" />
+            app:sv_unitTextSize="8dp" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:gravity="center_horizontal"
         android:orientation="horizontal">
 
         <com.github.anastr.speedviewlib.ImageLinearGauge

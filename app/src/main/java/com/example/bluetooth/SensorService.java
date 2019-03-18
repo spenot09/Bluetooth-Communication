@@ -23,44 +23,39 @@ public class SensorService extends Service implements SensorEventListener {
 
     private static final String TAG = "SensorService";
 
-    static final int MSG_SENSOR = 0;
-    static final int MSG_ACCELEROMETER = 1;
-    static final int MSG_LIGHT = 2;
-    static final int MSG_REGISTER_CLIENT = 3;
-
-
     private Sensor sensor;
     private SensorManager sensorManager;
 
-    Messenger mClient; // Keeps track of all current registered clients.
+    // Keeps track of all current registered clients
+    Messenger mClient;
 
-
-    final Messenger mMessenger = new Messenger(new IncomingHandler()); // Target we publish for clients to send messages to IncomingHandler.
-
+    // Target we publish for clients to send messages to IncomingHandler
+    final Messenger mMessenger = new Messenger(new IncomingHandler());
 
     //      Service Functions       //
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //Toast.makeText(this, "Service Started", Toast.LENGTH_SHORT).show();
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
         return START_STICKY;
     }
 
-    class IncomingHandler extends Handler { // Handler of incoming messages from clients.
+    // Handler of incoming messages from clients.
+    class IncomingHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_REGISTER_CLIENT:
+                case Constants.MSG_REGISTER_CLIENT:
                     mClient=(msg.replyTo);
                     break;
-                case MSG_SENSOR:
+                // Select and register the correct sensor based on incoming messages
+                case Constants.MSG_SENSOR:
                     sensorManager.unregisterListener(SensorService.this, sensor);
-                    if (msg.arg1==MSG_ACCELEROMETER) {
+                    if (msg.arg1==Constants.MSG_ACCELEROMETER) {
                         sensor = sensorManager.getDefaultSensor(TYPE_ACCELEROMETER);
                     }
-                    if (msg.arg1==MSG_LIGHT) {
+                    if (msg.arg1==Constants.MSG_LIGHT) {
                         sensor = sensorManager.getDefaultSensor(TYPE_LIGHT);
                     }
                     sensorManager.registerListener(SensorService.this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
@@ -71,10 +66,11 @@ public class SensorService extends Service implements SensorEventListener {
         }
     }
 
+    // Procedure to send messages back to Activity that instantiated it
     private void sendMessageToUI(float sensor_val) {
             try {
                 // Send data as an int, this will need to be a float but just testing atm with a static value passed as a parameter
-                mClient.send(Message.obtain(null, MSG_SENSOR, sensor_val));
+                mClient.send(Message.obtain(null, Constants.MSG_SENSOR, sensor_val));
             }
             catch (RemoteException e) {
                 // The client is dead. Remove it from the list; we are going through the list from back to front so this is safe to do inside the loop.
@@ -99,7 +95,7 @@ public class SensorService extends Service implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        // grab the values and timestamp -- off the main thread
+        // grab the values -- off the main thread
         new SensorEventTask().execute(event);
     }
 

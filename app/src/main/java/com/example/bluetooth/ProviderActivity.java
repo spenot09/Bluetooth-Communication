@@ -23,25 +23,18 @@ import pl.droidsonroids.gif.GifImageView;
 
 public class ProviderActivity extends AppCompatActivity {
 
-    private Button start_service_button, stop_service_button, bind_bluetooth_button;
-    private TextView sensor_txt,provider_instruction_textView,light_textView, acc_textView, textStatus;
+    private Button start_service_button, stop_service_button;
+    private TextView sensor_txt,provider_instruction_textView;
+
+    // "Sensing" GIF
     private GifImageView gif;
-
-    private int sensor_type; //sensor_type will need to be set by the incoming request from the client
-    static final int MSG_ACCELEROMETER = 1;
-    static final int MSG_LIGHT = 2;
-
-    private boolean bound;
-
-    Messenger mService = null;
-    final Messenger mMessenger =new Messenger(new IncomingHandler());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_provider);
 
-        //Set up a "Back" button
+        // Set up a "Back" button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         start_service_button = findViewById(R.id.start_service_button);
@@ -52,12 +45,11 @@ public class ProviderActivity extends AppCompatActivity {
 
         gif = findViewById(R.id.gifImageView);
 
-
-        //Remove elements not needed currently on start-up
+        // Remove elements not needed currently on start-up
         sensor_txt.setVisibility(View.INVISIBLE);  // For Invisible/Disappear
         gif.setVisibility(View.INVISIBLE);
 
-        //define fading animations
+        // Define fading animations
         final Animation single_out = new AlphaAnimation(1.0f, 0.0f);
         single_out.setDuration(1000);
 
@@ -72,10 +64,10 @@ public class ProviderActivity extends AppCompatActivity {
         start_service_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //start the service in the background from SensorService
+                // Start the service in the background from SensorService
                 startService(new Intent(getBaseContext(), SensorService.class));
 
-                //Sort out the appearance of the View
+                // Sort out the appearance of the View
                 provider_instruction_textView.startAnimation(single_out);
 
                 provider_instruction_textView.setVisibility(View.INVISIBLE);
@@ -89,10 +81,10 @@ public class ProviderActivity extends AppCompatActivity {
         stop_service_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //Stop the service by implicitly calling onDestroy()
+                // Stop the service by implicitly calling onDestroy()
                 stopService(new Intent(getBaseContext(), SensorService.class));
 
-                //Sort out the appearance of the View
+                // Sort out the appearance of the View
                 sensor_txt.clearAnimation();
                 gif.startAnimation(single_out);
                 gif.setVisibility(View.INVISIBLE);
@@ -100,82 +92,9 @@ public class ProviderActivity extends AppCompatActivity {
                 provider_instruction_textView.setVisibility(View.VISIBLE);
             }
         });
-
-        //rename bind bluetooth to broadcast bluetooth button
     }
 
-    class IncomingHandler extends Handler {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case SensorService.MSG_SENSOR:
-                    if (sensor_type==MSG_ACCELEROMETER) {
-                        acc_textView.setText(String.format("Accelerometer value: %.1f", msg.obj)); //this will need to be deleted later on
-                    }
-                    if (sensor_type==MSG_LIGHT) {
-                        light_textView.setText("Light sensor value: " + msg.obj); //this will need to be deleted later
-                    }
-                    break;
-                default:
-                    super.handleMessage(msg);
-            }
-        }
-    }
-
-    private ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder service) {
-            mService = new Messenger(service);
-            textStatus.setText("Attached.");
-            try {
-                Message msg = Message.obtain(null, SensorService.MSG_REGISTER_CLIENT);
-                msg.replyTo = mMessenger;
-                mService.send(msg);
-            }
-            catch (RemoteException e) {
-                // In this case the service has crashed before we could even do anything with it
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            mService = null;
-            textStatus.setText("Disconnected.");
-            bound = false;
-        }
-    };
-
-    private void sendMessageToService(int intvaluetosend) {
-        if (bound) {
-            if (mService != null) {
-                try {
-                    //need to check this if successful because may need to alter for use
-                    Message msg = Message.obtain(null, SensorService.MSG_SENSOR, intvaluetosend, 0);
-                    msg.replyTo = mMessenger;
-                    mService.send(msg);
-                }
-                catch (RemoteException e) {
-                }
-            }
-        }
-    }
-
-    void doBindService() {
-        bindService(new Intent(this, SensorService.class), connection, Context.BIND_AUTO_CREATE);
-        bound = true;
-        textStatus.setText("Binding.");
-    }
-
-    void doUnbindService() {
-        if (bound) {
-
-            // Detach our existing connection.
-            unbindService(connection);
-            bound = false;
-            textStatus.setText("Unbinding.");
-        }
-    }
-
+    // Method for setting up "back" button
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {

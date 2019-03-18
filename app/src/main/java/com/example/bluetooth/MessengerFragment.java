@@ -42,39 +42,49 @@ import static android.content.ContentValues.TAG;
 
 public class MessengerFragment extends Fragment {
 
+    // Set messages to be initiated during BT connection
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
     private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
     private static final int REQUEST_ENABLE_BT = 3;
 
+    // Lists used for "chatbot" to allow possible associations with sensor type commands
     private List<String> acc_terms = Arrays.asList("accelerometer", "speed", "tilt", "TYPE_ACCELEROMETER");
     private List<String> light_terms = Arrays.asList("light", "Light", "light sensor", "TYPE_LIGHT");
 
-    private int sensor_type; //sensor_type will need to be set by the incoming request from the client
-    static final int MSG_ACCELEROMETER = 1;
-    static final int MSG_LIGHT = 2;
+    // Sensor_type will need to be set by the incoming request from the client
+    private int sensor_type;
 
+    // Initialise the variable that will act as the container for the incoming sensor values
     private float sens_val_receiver_end;
 
+    // Set up the chat components and buttons to interact with the app
     private ListView chatWindow;
     private EditText editMessage;
     private Button sendButton, start_service, client_button, receiver_btn, visualise_btn;
 
-    private String connectedDeciceName = null;
+    private String connectedDeviceName = null;
 
+    // Initialise container to hold sensor value from service locally
     private float sensor_val;
 
+    // Initialise ArrayAdapter that will allow for scrolling chatWindow
     private ArrayAdapter<String> chatAdapter;
 
+    // Initialise BT components and chat buffer
     private StringBuffer messageOutBuffer;
     private BluetoothAdapter bluetoothAdapter;
 
+    // An instance of ChatService
     private ChatService chatService;
 
+    // Initialise booleans that allow us to keep track of states
     private boolean bound, receive, visualise;
 
+    // Initialise speedometer and linearGauge for visualisations
     private PointerSpeedometer speedometer;
     private ImageLinearGauge fire_gauge;
 
+    // Instantiations to allow inter-service communication
     Messenger mService = null;
     final Messenger mMessenger = new Messenger(new IncomingHandler());
 
@@ -83,7 +93,7 @@ public class MessengerFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        //Get local Bluetooth adapter
+        // Get local Bluetooth adapter
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         // If the adapter is null, then Bluetooth is not supported
@@ -97,7 +107,7 @@ public class MessengerFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        // enable bt adapter here
+        // Enable BT adapter here
         if (!bluetoothAdapter.isEnabled()) {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
@@ -148,6 +158,8 @@ public class MessengerFragment extends Fragment {
         fire_gauge = view.findViewById(R.id.fireGauge);
 
         speedometer = view.findViewById(R.id.accGauge);
+
+        // set base view to 0 of speedometer and allow movement from there
         speedometer.speedTo(0);
     }
 
@@ -170,6 +182,7 @@ public class MessengerFragment extends Fragment {
             }
         });
 
+        // Launch the ProviderActivity from which the SensorService can be started
         start_service.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -178,21 +191,22 @@ public class MessengerFragment extends Fragment {
             }
         });
 
+        // Bind to the service locally and communicate to SensorService which Sensor to sample
         client_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 doBindService();
-
-                Log.e(TAG, "VALUE OF SENSOR_TYPE IS: " + Integer.toString(sensor_type));
-                if (sensor_type == MSG_ACCELEROMETER) {
-                    sendMessageToService(MSG_ACCELEROMETER);
+                Log.i(TAG, "VALUE OF SENSOR_TYPE IS: " + Integer.toString(sensor_type));
+                if (sensor_type == Constants.MSG_ACCELEROMETER) {
+                    sendMessageToService(Constants.MSG_ACCELEROMETER);
                 }
-                if(sensor_type == MSG_LIGHT){
-                    sendMessageToService(MSG_LIGHT);
+                if(sensor_type == Constants.MSG_LIGHT){
+                    sendMessageToService(Constants.MSG_LIGHT);
                 }
             }
         });
 
+        // State change to signal client is ready to receive data
         receiver_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -200,6 +214,7 @@ public class MessengerFragment extends Fragment {
             }
         });
 
+        // State change to visualise incoming "received" data
         visualise_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -215,7 +230,7 @@ public class MessengerFragment extends Fragment {
     }
 
     private void ensureDiscoverable() {
-        //insert discoverable code here
+        // Enables device to be discovered by other BT devices in range
         if (bluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
             Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
             discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
@@ -223,6 +238,7 @@ public class MessengerFragment extends Fragment {
         }
     }
 
+    // Procedure used to send messages to the chatWindow and across BT
     private void sendMessage(String message) {
         // Check that we're actually connected before trying anything
         if (chatService.getState() != ChatService.STATE_CONNECTED) {
@@ -242,6 +258,7 @@ public class MessengerFragment extends Fragment {
         }
     }
 
+    // Item selection from drop down menu and initiates the correct Intent
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent serverIntent = null;
@@ -285,15 +302,17 @@ public class MessengerFragment extends Fragment {
         actionBar.setSubtitle(subTitle);
     }
 
+    // Handler to check for incoming messages from SensorService
     class IncomingHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case SensorService.MSG_SENSOR:
-
+                case Constants.MSG_SENSOR:
+                    // Extract float value from incoming message object
                     sensor_val = (float) (msg.obj);
-                    runnable_message.run();
 
+                    // Function to send incoming sensor values across the connected BT chat
+                    runnable_message.run();
                     break;
                 default:
                     super.handleMessage(msg);
@@ -301,22 +320,22 @@ public class MessengerFragment extends Fragment {
         }
     }
 
-    // Define the code block to be executed
     private Runnable runnable_message = new Runnable() {
         @Override
         public void run() {
-            // Do something here on the main thread
+            // Send messages on the main thread
             sendMessage(Float.toString(sensor_val));
             Log.d("Handlers", "Called on main thread");
         }
     };
 
+    // ServiceConnection to manage the connection between the activity and the service.
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             mService = new Messenger(service);
             try {
-                Message msg = Message.obtain(null, SensorService.MSG_REGISTER_CLIENT);
+                Message msg = Message.obtain(null, Constants.MSG_REGISTER_CLIENT);
                 msg.replyTo = mMessenger;
                 mService.send(msg);
             } catch (RemoteException e) {
@@ -330,13 +349,14 @@ public class MessengerFragment extends Fragment {
         }
     };
 
-
+    // Procedure to communicate with the SensorService running locally
     private void sendMessageToService(int intvaluetosend) {
         if (bound) {
             if (mService != null) {
                 try {
-                    //need to check this if successful because may need to alter for use
-                    Message msg = Message.obtain(null, SensorService.MSG_SENSOR, intvaluetosend, 0);
+                    // Extract ID to reply to and send "intvaluetosend" to SensorService, ready to
+                    // caught by an Handler on the other side
+                    Message msg = Message.obtain(null, Constants.MSG_SENSOR, intvaluetosend, 0);
                     msg.replyTo = mMessenger;
                     mService.send(msg);
                 } catch (RemoteException e) {
@@ -345,6 +365,7 @@ public class MessengerFragment extends Fragment {
         }
     }
 
+    // Procedure that encompasses binding and registers state change via boolean "bound" variable
     void doBindService() {
         getActivity().bindService(new Intent(getActivity(), SensorService.class), connection, Context.BIND_AUTO_CREATE);
         bound = true;
@@ -359,17 +380,18 @@ public class MessengerFragment extends Fragment {
         }
     }
 
-
+    // Handler that interfaces with the ChatService
     private final Handler chatHandler = new Handler() {
         @SuppressLint("StringFormatInvalid")
         @Override
         public void handleMessage(Message msg) {
             FragmentActivity activity = getActivity();
             switch (msg.what) {
+                // A change of state has occurred that needs to be handled gracefully
                 case Constants.MESSAGE_STATE_CHANGE:
                     switch (msg.arg1) {
                         case ChatService.STATE_CONNECTED:
-                            setStatus(getString(R.string.title_connected_to, connectedDeciceName));
+                            setStatus(getString(R.string.title_connected_to, connectedDeviceName));
                             chatAdapter.clear();
                             break;
                         case ChatService.STATE_CONNECTING:
@@ -381,59 +403,67 @@ public class MessengerFragment extends Fragment {
                             break;
                     }
                     break;
+
+                // A message is to be written to the chatAdapter and thus eventually
+                // the chatWindow
                 case Constants.MESSAGE_WRITE:
                     byte[] writeBuf = (byte[]) msg.obj;
                     // construct a string from the buffer
                     String writeMessage = new String(writeBuf);
 
+                    // Determine which sensor has been selected based on outgoing message. This is used to
+                    // synchronize the sensor_type with the Provider device and allow correct visualisation
                     if (acc_terms.contains(writeMessage)){
                         Log.e(TAG, "ACCELEROMETER SELECTED");
-                        sensor_type = MSG_ACCELEROMETER;
+                        sensor_type = Constants.MSG_ACCELEROMETER;
                     }
 
                     if (light_terms.contains(writeMessage)){
                         Log.e(TAG, "LIGHT SELECTED");
-                        sensor_type = MSG_LIGHT;
+                        sensor_type = Constants.MSG_LIGHT;
                     }
 
                     chatAdapter.add("Me:  " + writeMessage);
                     break;
+
                 case Constants.MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
                     // construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
-                    //Log.e(TAG, "THE INCOMING VALUE IS: "+readMessage);
 
+                    // Check if incoming message is from the Client device. If so then set sensor_type
+                    // to the correct value on the Client device, which will then be passed to SensorService.
                     if (acc_terms.contains(readMessage)){
                         Log.e(TAG, "ACCELEROMETER SELECTED");
-                        sensor_type = MSG_ACCELEROMETER;
+                        sensor_type = Constants.MSG_ACCELEROMETER;
                     }
 
                     if (light_terms.contains(readMessage)){
                         Log.e(TAG, "LIGHT SELECTED");
-                        sensor_type = MSG_LIGHT;
+                        sensor_type = Constants.MSG_LIGHT;
                     }
 
+                    // If Client is ready to receive then parse and do so. Visualise if state requires it also
                     if(receive){
                         sens_val_receiver_end = Float.parseFloat(readMessage);
                         Log.e(TAG, "Value of sens_val_receiver_end is " + sens_val_receiver_end);
                         if (visualise){
                             Log.e(TAG, "Value of sensor_type is: " + sensor_type);
-                            if (sensor_type == MSG_ACCELEROMETER) {
+                            if (sensor_type == Constants.MSG_ACCELEROMETER) {
                                 speedometer.speedTo(sens_val_receiver_end, 500);
                             }
-                            if(sensor_type == MSG_LIGHT){
+                            if(sensor_type == Constants.MSG_LIGHT){
                                 fire_gauge.speedTo(sens_val_receiver_end, 500);
                             }
                         }
                     }
-                    chatAdapter.add(connectedDeciceName + ":  " + readMessage);
+                    chatAdapter.add(connectedDeviceName + ":  " + readMessage);
                     break;
                 case Constants.MESSAGE_DEVICE_NAME:
                     // save the connected device's name
-                    connectedDeciceName = msg.getData().getString(Constants.DEVICE_NAME);
+                    connectedDeviceName = msg.getData().getString(Constants.DEVICE_NAME);
                     if (null != activity) {
-                        Toast.makeText(activity, "Connected to " + connectedDeciceName, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(activity, "Connected to " + connectedDeviceName, Toast.LENGTH_SHORT).show();
                     }
                     break;
                 case Constants.MESSAGE_TOAST:
