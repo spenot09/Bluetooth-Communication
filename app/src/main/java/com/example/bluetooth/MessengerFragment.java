@@ -200,7 +200,7 @@ public class MessengerFragment extends Fragment {
                 if (sensor_type == Constants.MSG_ACCELEROMETER) {
                     sendMessageToService(Constants.MSG_ACCELEROMETER);
                 }
-                if(sensor_type == Constants.MSG_LIGHT){
+                if (sensor_type == Constants.MSG_LIGHT) {
                     sendMessageToService(Constants.MSG_LIGHT);
                 }
             }
@@ -413,12 +413,12 @@ public class MessengerFragment extends Fragment {
 
                     // Determine which sensor has been selected based on outgoing message. This is used to
                     // synchronize the sensor_type with the Provider device and allow correct visualisation
-                    if (acc_terms.contains(writeMessage)){
+                    if (acc_terms.contains(writeMessage)) {
                         Log.e(TAG, "ACCELEROMETER SELECTED");
                         sensor_type = Constants.MSG_ACCELEROMETER;
                     }
 
-                    if (light_terms.contains(writeMessage)){
+                    if (light_terms.contains(writeMessage)) {
                         Log.e(TAG, "LIGHT SELECTED");
                         sensor_type = Constants.MSG_LIGHT;
                     }
@@ -433,26 +433,26 @@ public class MessengerFragment extends Fragment {
 
                     // Check if incoming message is from the Client device. If so then set sensor_type
                     // to the correct value on the Client device, which will then be passed to SensorService.
-                    if (acc_terms.contains(readMessage)){
+                    if (acc_terms.contains(readMessage)) {
                         Log.e(TAG, "ACCELEROMETER SELECTED");
                         sensor_type = Constants.MSG_ACCELEROMETER;
                     }
 
-                    if (light_terms.contains(readMessage)){
+                    if (light_terms.contains(readMessage)) {
                         Log.e(TAG, "LIGHT SELECTED");
                         sensor_type = Constants.MSG_LIGHT;
                     }
 
                     // If Client is ready to receive then parse and do so. Visualise if state requires it also
-                    if(receive){
+                    if (receive) {
                         sens_val_receiver_end = Float.parseFloat(readMessage);
                         Log.e(TAG, "Value of sens_val_receiver_end is " + sens_val_receiver_end);
-                        if (visualise){
+                        if (visualise) {
                             Log.e(TAG, "Value of sensor_type is: " + sensor_type);
                             if (sensor_type == Constants.MSG_ACCELEROMETER) {
                                 speedometer.speedTo(sens_val_receiver_end, 500);
                             }
-                            if(sensor_type == Constants.MSG_LIGHT){
+                            if (sensor_type == Constants.MSG_LIGHT) {
                                 fire_gauge.speedTo(sens_val_receiver_end, 500);
                             }
                         }

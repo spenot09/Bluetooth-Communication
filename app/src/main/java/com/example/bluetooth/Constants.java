@@ -29,11 +29,9 @@ public interface Constants {
     public static final String DEVICE_NAME = "device_name";
     public static final String TOAST = "toast";
 
+    // Message types sent between SensorService and Activities
     static final int MSG_SENSOR = 0;
     static final int MSG_ACCELEROMETER = 1;
     static final int MSG_LIGHT = 2;
     static final int MSG_REGISTER_CLIENT = 3;
-
-
-
 }

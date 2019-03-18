@@ -24,7 +24,7 @@ import pl.droidsonroids.gif.GifImageView;
 public class ProviderActivity extends AppCompatActivity {
 
     private Button start_service_button, stop_service_button;
-    private TextView sensor_txt,provider_instruction_textView;
+    private TextView sensor_txt, provider_instruction_textView;
 
     // "Sensing" GIF
     private GifImageView gif;
@@ -53,7 +53,7 @@ public class ProviderActivity extends AppCompatActivity {
         final Animation single_out = new AlphaAnimation(1.0f, 0.0f);
         single_out.setDuration(1000);
 
-        final AlphaAnimation fadeIn = new AlphaAnimation(0.0f , 1.0f ) ;
+        final AlphaAnimation fadeIn = new AlphaAnimation(0.0f, 1.0f);
         fadeIn.setDuration(1000);
 
         final Animation out = new AlphaAnimation(1.0f, 0.0f);
