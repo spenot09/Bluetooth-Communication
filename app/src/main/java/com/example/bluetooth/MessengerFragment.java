@@ -156,15 +156,14 @@ public class MessengerFragment extends Fragment {
         visualise_btn = view.findViewById(R.id.graphs_btn);
 
         fire_gauge = view.findViewById(R.id.fireGauge);
-
         speedometer = view.findViewById(R.id.accGauge);
 
-        // set base view to 0 of speedometer and allow movement from there
+        // set base position to 0 of speedometer and allow movement from there
         speedometer.speedTo(0);
     }
 
     private void setupChat() {
-        // Initialize the array adapter for the conversation thread
+               // Initialize the array adapter for the conversation thread
         chatAdapter = new ArrayAdapter<String>(getActivity(), R.layout.message);
 
         chatWindow.setAdapter(chatAdapter);
@@ -235,6 +234,12 @@ public class MessengerFragment extends Fragment {
             Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
             discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
             startActivity(discoverableIntent);
+
+            /**
+            // Welcome message and instructions on initial load up
+            sendMessage("Hi there! Welcome to SensX.\nTo start remote sensing select either the" +
+                    " Accelerometer {accelerometer, speed, tilt, TYPE_ACCELEROMETER} or the Light sensor " +
+                    "{light, Light, light sensor, TYPE_LIGHT}"); **/
         }
     }
 
@@ -494,6 +499,9 @@ public class MessengerFragment extends Fragment {
                 if (resultCode == Activity.RESULT_OK) {
                     // Bluetooth is now enabled, so set up a chat session
                     setupChat();
+
+
+
                 } else {
                     // User did not enable Bluetooth or an error occurred
                     Toast.makeText(getActivity(), R.string.bt_not_enabled_leaving,

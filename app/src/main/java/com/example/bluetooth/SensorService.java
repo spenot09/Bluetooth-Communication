@@ -79,7 +79,7 @@ public class SensorService extends Service implements SensorEventListener {
 
     @Override
     public IBinder onBind(Intent intent) {
-        Toast.makeText(this, "Service Binding...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Service has bound. Tap again to send.", Toast.LENGTH_SHORT).show();
         return mMessenger.getBinder();
     }
 
