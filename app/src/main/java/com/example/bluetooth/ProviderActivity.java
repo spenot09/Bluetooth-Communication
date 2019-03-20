@@ -94,6 +94,7 @@ public class ProviderActivity extends AppCompatActivity {
         });
     }
 
+
     // Method for setting up "back" button
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

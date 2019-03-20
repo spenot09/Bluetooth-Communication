@@ -9,7 +9,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -147,11 +146,11 @@ public class MessengerFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        chatWindow = (ListView) view.findViewById(R.id.chat_window);
-        editMessage = (EditText) view.findViewById(R.id.edit_message);
-        sendButton = (Button) view.findViewById(R.id.send_btn);
-        start_service = (Button) view.findViewById(R.id.service_btn);
-        client_button = (Button) view.findViewById(R.id.client_btn);
+        chatWindow = view.findViewById(R.id.chat_window);
+        editMessage = view.findViewById(R.id.edit_message);
+        sendButton = view.findViewById(R.id.send_btn);
+        start_service = view.findViewById(R.id.service_btn);
+        client_button = view.findViewById(R.id.client_btn);
         receiver_btn = view.findViewById(R.id.receiver_btn);
         visualise_btn = view.findViewById(R.id.graphs_btn);
 
@@ -185,6 +184,7 @@ public class MessengerFragment extends Fragment {
         start_service.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                doUnbindService();
                 Intent intent = new Intent(getActivity(), ProviderActivity.class);
                 startActivity(intent);
             }
@@ -234,12 +234,6 @@ public class MessengerFragment extends Fragment {
             Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
             discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
             startActivity(discoverableIntent);
-
-            /**
-            // Welcome message and instructions on initial load up
-            sendMessage("Hi there! Welcome to SensX.\nTo start remote sensing select either the" +
-                    " Accelerometer {accelerometer, speed, tilt, TYPE_ACCELEROMETER} or the Light sensor " +
-                    "{light, Light, light sensor, TYPE_LIGHT}"); **/
         }
     }
 
@@ -398,6 +392,9 @@ public class MessengerFragment extends Fragment {
                         case ChatService.STATE_CONNECTED:
                             setStatus(getString(R.string.title_connected_to, connectedDeviceName));
                             chatAdapter.clear();
+                            chatAdapter.add("Hi there! Welcome to SensX :)\nPlease select the " +
+                                    "sensor you'd like to use by typing in the appropriate command. " +
+                                    "We currently support use of the Accelerometer and Light sensors.");
                             break;
                         case ChatService.STATE_CONNECTING:
                             setStatus(R.string.title_connecting);
@@ -499,9 +496,6 @@ public class MessengerFragment extends Fragment {
                 if (resultCode == Activity.RESULT_OK) {
                     // Bluetooth is now enabled, so set up a chat session
                     setupChat();
-
-
-
                 } else {
                     // User did not enable Bluetooth or an error occurred
                     Toast.makeText(getActivity(), R.string.bt_not_enabled_leaving,
