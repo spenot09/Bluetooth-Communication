@@ -322,9 +322,11 @@ public class MessengerFragment extends Fragment {
     private Runnable runnable_message = new Runnable() {
         @Override
         public void run() {
-            // Send messages on the main thread
-            sendMessage(Float.toString(sensor_val));
-            Log.d("Handlers", "Called on main thread");
+            if (bound) {
+                // Send messages on the main thread
+                sendMessage(Float.toString(sensor_val));
+                Log.d("Handlers", "Called on main thread");
+            }
         }
     };
 
@@ -372,7 +374,6 @@ public class MessengerFragment extends Fragment {
 
     void doUnbindService() {
         if (bound) {
-
             // Detach our existing connection.
             getActivity().unbindService(connection);
             bound = false;
