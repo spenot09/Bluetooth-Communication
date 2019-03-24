@@ -39,7 +39,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:background="#9C09C5B3">
+
+
+    <TextView
+            android:id="@+id/Provider_textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Provider device -> "
+            />
 
 
         <Button
@@ -60,8 +69,16 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal"
-        android:layout_marginBottom="10dp">
+        android:layout_marginBottom="10dp"
+        android:background="#852196F3">
+        >
 
+        <TextView
+            android:id="@+id/client_textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Client device -> "
+            />
 
         <Button
             android:id="@+id/receiver_btn"
